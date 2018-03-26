@@ -13,7 +13,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.StrictMode;
 import android.os.Vibrator;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -83,63 +82,6 @@ public class XMLParser extends AsyncTask<String, Integer, String> {
 		initializeDefaults();
 	}
 
-	protected void onPreExecute() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-					.permitAll().build();
-			StrictMode.setThreadPolicy(policy);
-		}
-	}
-
-	public Bitmap decodeBitmapIcon(String filename) throws IOException {
-		String index = filename.substring(filename.lastIndexOf("/") + 1, filename.lastIndexOf("."));
-		File file = new File(mContext.getExternalFilesDir(null) + "/images", index + ".png");
-		if (file.exists()) {
-			return BitmapFactory.decodeFile(file.getAbsolutePath());
-		} else {
-			URL updateURL = new URL(filename);
-			URLConnection conn1 = updateURL.openConnection();
-			InputStream im = conn1.getInputStream();
-			BufferedInputStream bis = new BufferedInputStream(im, 512);
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inJustDecodeBounds = true;
-			Bitmap bitmap = BitmapFactory.decodeStream(bis, null, options);
-			int heightRatio = (int) Math.ceil(options.outHeight / (float) 72);
-			int widthRatio = (int) Math.ceil(options.outWidth / (float) 72);
-			if (heightRatio > 1 || widthRatio > 1) {
-				if (heightRatio > widthRatio) {
-					options.inSampleSize = heightRatio;
-				} else {
-					options.inSampleSize = widthRatio;
-				}
-			}
-			options.inJustDecodeBounds = false;
-			bis.close();
-			im.close();
-			conn1 = updateURL.openConnection();
-			im = conn1.getInputStream();
-			bis = new BufferedInputStream(im, 512);
-			bitmap = BitmapFactory.decodeStream(bis, null, options);
-			bis.close();
-			im.close();
-			bis = null;
-			im = null;
-			OutputStream fOut = null;
-			if (!file.getParentFile().exists()) {
-				file.getParentFile().mkdir();
-			}
-			try {
-				fOut = new FileOutputStream(file, false);
-				bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-				fOut.flush();
-				fOut.close();
-			} catch (Exception ex) {
-				
-			}
-			return bitmap;
-		}
-	}
-
 	@Override
 	protected String doInBackground(String... params) {
 		String filename = game_name = params[0];
@@ -202,7 +144,8 @@ public class XMLParser extends AsyncTask<String, Integer, String> {
 							boxart = (Element) images.getElementsByTagName("boxart").item(0);
 						}
 						if (boxart != null) {
-							coverart = decodeBitmapIcon("http://thegamesdb.net/banners/" + getElementValue(boxart));
+							(new decodeBitmapIcon()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+									"http://thegamesdb.net/banners/" + getElementValue(boxart));
 							game_icon = new BitmapDrawable(coverart);
 						}
 					}
@@ -339,5 +282,68 @@ public class XMLParser extends AsyncTask<String, Integer, String> {
 			}
 		}
 		return "";
+	}
+
+	private class decodeBitmapIcon extends AsyncTask<String, Integer, Bitmap> {
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			try {
+				String index = params[0].substring(params[0].lastIndexOf("/") + 1, params[0].lastIndexOf("."));
+				File file = new File(mContext.getExternalFilesDir(null) + "/images", index + ".png");
+				if (file.exists()) {
+					return BitmapFactory.decodeFile(file.getAbsolutePath());
+				} else {
+					URL updateURL = new URL(params[0]);
+					URLConnection conn1 = updateURL.openConnection();
+					InputStream im = conn1.getInputStream();
+					BufferedInputStream bis = new BufferedInputStream(im, 512);
+					BitmapFactory.Options options = new BitmapFactory.Options();
+					options.inJustDecodeBounds = true;
+					Bitmap bitmap = BitmapFactory.decodeStream(bis, null, options);
+					int heightRatio = (int) Math.ceil(options.outHeight / (float) 72);
+					int widthRatio = (int) Math.ceil(options.outWidth / (float) 72);
+					if (heightRatio > 1 || widthRatio > 1) {
+						if (heightRatio > widthRatio) {
+							options.inSampleSize = heightRatio;
+						} else {
+							options.inSampleSize = widthRatio;
+						}
+					}
+					options.inJustDecodeBounds = false;
+					bis.close();
+					im.close();
+					conn1 = updateURL.openConnection();
+					im = conn1.getInputStream();
+					bis = new BufferedInputStream(im, 512);
+					bitmap = BitmapFactory.decodeStream(bis, null, options);
+					bis.close();
+					im.close();
+					bis = null;
+					im = null;
+					OutputStream fOut = null;
+					if (!file.getParentFile().exists()) {
+						file.getParentFile().mkdir();
+					}
+					try {
+						fOut = new FileOutputStream(file, false);
+						bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+						fOut.flush();
+						fOut.close();
+					} catch (Exception ex) {
+
+					}
+					return bitmap;
+				}
+			} catch (IOException e) {
+
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap gameImage) {
+			coverart = gameImage;
+			game_icon = new BitmapDrawable(gameImage);
+		}
 	}
 }

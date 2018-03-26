@@ -23,12 +23,6 @@ import android.widget.TextView;
 import com.reicast.emulator.FileBrowser.OnItemSelectedListener;
 import com.reicast.emulator.config.Config;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -37,6 +31,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,6 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -67,8 +63,8 @@ public class XMLParser extends AsyncTask<String, Integer, String> {
 	private String gameId;
 	private String game_details;
 
-	private static final String game_index = "http://thegamesdb.net/api/GetGamesList.php?platform=sega+dreamcast&name=";
-	private static final String game_id = "http://thegamesdb.net/api/GetGame.php?platform=sega+dreamcast&id=";
+	private String game_index = "http://thegamesdb.net/api/GetGamesList.php?platform=sega+dreamcast&name=";
+	private String game_id = "http://thegamesdb.net/api/GetGame.php?platform=sega+dreamcast&id=";
 
 	public XMLParser(File game, int index, SharedPreferences mPrefs) {
 		this.mPrefs = mPrefs;
@@ -148,10 +144,9 @@ public class XMLParser extends AsyncTask<String, Integer, String> {
 	protected String doInBackground(String... params) {
 		String filename = game_name = params[0];
 		if (isNetworkAvailable() && mPrefs.getBoolean(Config.pref_gamedetails, false)) {
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-			HttpPost httpPost;
+			String xmlUrl = "";
 			if (gameId != null) {
-				httpPost = new HttpPost(game_id + gameId);
+				xmlUrl = game_id + gameId;
 			} else {
 				filename = filename.substring(0, filename.lastIndexOf("."));
 				try {
@@ -159,15 +154,23 @@ public class XMLParser extends AsyncTask<String, Integer, String> {
 				} catch (UnsupportedEncodingException e) {
 					filename = filename.replace(" ", "+");
 				}
-				httpPost = new HttpPost(game_index + filename);
+				xmlUrl = game_index + filename;
 			}
-			try {
-				HttpResponse httpResponse = httpClient.execute(httpPost);
-				HttpEntity httpEntity = httpResponse.getEntity();
-				return EntityUtils.toString(httpEntity);
-			} catch (UnsupportedEncodingException e) {
 
-			} catch (ClientProtocolException e) {
+			try {
+				HttpURLConnection conn = (HttpURLConnection) new URL(xmlUrl).openConnection();
+				conn.setRequestMethod("POST");
+				conn.setDoInput(true);
+
+				InputStream is = new BufferedInputStream(conn.getInputStream());
+				ByteArrayOutputStream result = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int length;
+				while ((length = is.read(buffer)) != -1) {
+					result.write(buffer, 0, length);
+				}
+				return result.toString();
+			} catch (UnsupportedEncodingException e) {
 
 			} catch (IOException e) {
 

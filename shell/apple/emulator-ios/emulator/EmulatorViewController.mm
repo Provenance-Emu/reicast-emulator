@@ -425,7 +425,7 @@ void MakeCurrentThreadRealTime()
             }];
 
 			[self.gController.gamepad.rightShoulder setValueChangedHandler:^(GCControllerButtonInput *button, float value, BOOL pressed) {
-				if (pressed) {
+				if (pressed && value >= 0.1) {
 					[self.emuView handleKeyDown:self.controllerView.img_rt];
 				} else {
 					[self.emuView handleKeyUp:self.controllerView.img_rt];
@@ -433,7 +433,7 @@ void MakeCurrentThreadRealTime()
 			}];
 
 			[self.gController.gamepad.leftShoulder setValueChangedHandler:^(GCControllerButtonInput *button, float value, BOOL pressed) {
-				if (pressed) {
+				if (pressed && value >= 0.1) {
 					[self.emuView handleKeyDown:self.controllerView.img_lt];
 				} else {
 					[self.emuView handleKeyUp:self.controllerView.img_lt];

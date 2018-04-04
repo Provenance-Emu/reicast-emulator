@@ -204,7 +204,7 @@ void VArray2::LockRegion(u32 offset,u32 size)
 	}
 
 	#else
-		printf("VA2: LockRegion\n");
+//		printf("VA2: LockRegion\n");
 	#endif
 }
 
@@ -255,7 +255,7 @@ void VArray2::UnLockRegion(u32 offset,u32 size)
 		die("mprotect  failed ..\n");
 	}
 	#else
-		printf("VA2: UnLockRegion\n");
+//		printf("VA2: UnLockRegion\n");
 	#endif
 }
 double os_GetSeconds()

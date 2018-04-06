@@ -303,7 +303,6 @@
 		B30B79CF2074D1F4001290A1 /* filter_neon.S in Sources */ = {isa = PBXBuildFile; fileRef = 84967C751B8F492C005F1140 /* filter_neon.S */; };
 		B30B79D02074D1F4001290A1 /* ini.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 876AA3751B818A4000617242 /* ini.cpp */; };
 		B30B79D12074D1F4001290A1 /* pngset.c in Sources */ = {isa = PBXBuildFile; fileRef = 84967C881B8F492C005F1140 /* pngset.c */; };
-		B30B79D22074D1F4001290A1 /* audiobackend_coreaudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.cpp */; };
 		B30B79D32074D1F4001290A1 /* chd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A3A5C18C806E00070BB5F /* chd.cpp */; };
 		B30B79D42074D1F4001290A1 /* sh4_fpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A3A3518C806DF0070BB5F /* sh4_fpu.cpp */; };
 		B30B79D52074D1F4001290A1 /* sh4_opcode_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A3A5418C806E00070BB5F /* sh4_opcode_list.cpp */; };
@@ -472,7 +471,16 @@
 		B3167F4A20743BC600A68303 /* gles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A3A8F18C806E00070BB5F /* gles.cpp */; };
 		B3167F4C20743C4800A68303 /* libpthread.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B3167F4B20743C4800A68303 /* libpthread.tbd */; };
 		B35D27DF2033EB7600F17D58 /* rec_cpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B35D27DE2033EB7600F17D58 /* rec_cpp.cpp */; };
-		EBDF37561BB96E1B001191B5 /* audiobackend_coreaudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.cpp */; };
+		B3C761F42078111F009950E4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3C761F32078111E009950E4 /* AVKit.framework */; };
+		B3C761F620781125009950E4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3C761F520781125009950E4 /* AVFoundation.framework */; };
+		B3C761FD2078138F009950E4 /* OEGameAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = B3C761F82078138E009950E4 /* OEGameAudio.m */; };
+		B3C761FE2078138F009950E4 /* OEGameAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = B3C761F82078138E009950E4 /* OEGameAudio.m */; };
+		B3C761FF2078138F009950E4 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = B3C761FA2078138E009950E4 /* TPCircularBuffer.c */; };
+		B3C762002078138F009950E4 /* TPCircularBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = B3C761FA2078138E009950E4 /* TPCircularBuffer.c */; };
+		B3C762012078138F009950E4 /* OERingBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = B3C761FB2078138E009950E4 /* OERingBuffer.m */; };
+		B3C762022078138F009950E4 /* OERingBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = B3C761FB2078138E009950E4 /* OERingBuffer.m */; };
+		B3C76203207813C0009950E4 /* audiobackend_coreaudio.mm in Sources */ = {isa = PBXBuildFile; fileRef = EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.mm */; };
+		B3C76204207813C0009950E4 /* audiobackend_coreaudio.mm in Sources */ = {isa = PBXBuildFile; fileRef = EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.mm */; };
 		EBDF375A1BB96ECD001191B5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBDF37591BB96ECD001191B5 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
@@ -916,7 +924,15 @@
 		B3338F102034466900F5589E /* rec_x64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rec_x64.cpp; sourceTree = "<group>"; };
 		B35D27DE2033EB7600F17D58 /* rec_cpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rec_cpp.cpp; sourceTree = "<group>"; };
 		B35D2819203420D700F17D58 /* ngen_arm64.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = ngen_arm64.S; sourceTree = "<group>"; };
-		EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = audiobackend_coreaudio.cpp; sourceTree = "<group>"; };
+		B3C761F32078111E009950E4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
+		B3C761F520781125009950E4 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		B3C761F72078138D009950E4 /* OERingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OERingBuffer.h; sourceTree = "<group>"; };
+		B3C761F82078138E009950E4 /* OEGameAudio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEGameAudio.m; sourceTree = "<group>"; };
+		B3C761F92078138E009950E4 /* OEGameAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEGameAudio.h; sourceTree = "<group>"; };
+		B3C761FA2078138E009950E4 /* TPCircularBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TPCircularBuffer.c; sourceTree = "<group>"; };
+		B3C761FB2078138E009950E4 /* OERingBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OERingBuffer.m; sourceTree = "<group>"; };
+		B3C761FC2078138F009950E4 /* TPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPCircularBuffer.h; sourceTree = "<group>"; };
+		EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = audiobackend_coreaudio.mm; sourceTree = "<group>"; };
 		EBDF37551BB96E1B001191B5 /* audiobackend_coreaudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audiobackend_coreaudio.h; sourceTree = "<group>"; };
 		EBDF37571BB96E75001191B5 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		EBDF37591BB96ECD001191B5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -927,6 +943,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3C761F620781125009950E4 /* AVFoundation.framework in Frameworks */,
+				B3C761F42078111F009950E4 /* AVKit.framework in Frameworks */,
 				B3167F4C20743C4800A68303 /* libpthread.tbd in Frameworks */,
 				EBDF375A1BB96ECD001191B5 /* AudioToolbox.framework in Frameworks */,
 				87D92F4E1B7A1B5700D8FD9E /* GameController.framework in Frameworks */,
@@ -987,7 +1005,13 @@
 		8497BCC31A41BFBA00EFB9ED /* oslib */ = {
 			isa = PBXGroup;
 			children = (
-				EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.cpp */,
+				B3C761F92078138E009950E4 /* OEGameAudio.h */,
+				B3C761F82078138E009950E4 /* OEGameAudio.m */,
+				B3C761F72078138D009950E4 /* OERingBuffer.h */,
+				B3C761FB2078138E009950E4 /* OERingBuffer.m */,
+				B3C761FA2078138E009950E4 /* TPCircularBuffer.c */,
+				B3C761FC2078138F009950E4 /* TPCircularBuffer.h */,
+				EBDF37541BB96E1B001191B5 /* audiobackend_coreaudio.mm */,
 				EBDF37551BB96E1B001191B5 /* audiobackend_coreaudio.h */,
 				877652B61B6157BD00437F10 /* audiobackend_alsa.cpp */,
 				877652B71B6157BD00437F10 /* audiobackend_alsa.h */,
@@ -1052,6 +1076,8 @@
 		87078A8518A47FE90034C7A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B3C761F520781125009950E4 /* AVFoundation.framework */,
+				B3C761F32078111E009950E4 /* AVKit.framework */,
 				B30B7AB22074DA2B001290A1 /* SystemConfiguration.framework */,
 				B30B7AB02074D9E2001290A1 /* CFNetwork.framework */,
 				B30B7AAE2074D9D0001290A1 /* libc++.tbd */,
@@ -2147,7 +2173,6 @@
 				84967C901B8F492C005F1140 /* filter_neon.S in Sources */,
 				876AA3771B818A4000617242 /* ini.cpp in Sources */,
 				84967C9B1B8F492C005F1140 /* pngset.c in Sources */,
-				EBDF37561BB96E1B001191B5 /* audiobackend_coreaudio.cpp in Sources */,
 				9C7A3B3618C806E00070BB5F /* chd.cpp in Sources */,
 				9C7A3B2118C806E00070BB5F /* sh4_fpu.cpp in Sources */,
 				9C7A3B3218C806E00070BB5F /* sh4_opcode_list.cpp in Sources */,
@@ -2168,6 +2193,7 @@
 				9C7A3ACE18C806E00070BB5F /* zip_file_strerror.c in Sources */,
 				9C7A3AED18C806E00070BB5F /* zip_unchange.c in Sources */,
 				877652C31B6157BD00437F10 /* audiobackend_directsound.cpp in Sources */,
+				B3C761FF2078138F009950E4 /* TPCircularBuffer.c in Sources */,
 				9C7A3B2518C806E00070BB5F /* ccn.cpp in Sources */,
 				849C0D621B072C07008BAAA4 /* context.cpp in Sources */,
 				84967C991B8F492C005F1140 /* pngrtran.c in Sources */,
@@ -2191,7 +2217,9 @@
 				9C7A3AE418C806E00070BB5F /* zip_source_file.c in Sources */,
 				9C7A3AD918C806E00070BB5F /* zip_memdup.c in Sources */,
 				87078A9B18A47FE90034C7A0 /* AppDelegate.m in Sources */,
+				B3C76203207813C0009950E4 /* audiobackend_coreaudio.mm in Sources */,
 				9C7A3B0218C806E00070BB5F /* aica_mem.cpp in Sources */,
+				B3C761FD2078138F009950E4 /* OEGameAudio.m in Sources */,
 				9C7A3ACA18C806E00070BB5F /* zip_fclose.c in Sources */,
 				9C7A3AD818C806E00070BB5F /* zip_get_num_files.c in Sources */,
 				9C7A3B0518C806E00070BB5F /* arm7.cpp in Sources */,
@@ -2222,6 +2250,7 @@
 				9C7A3AD118C806E00070BB5F /* zip_fopen_index.c in Sources */,
 				9C7A3B1318C806E00070BB5F /* _vmem.cpp in Sources */,
 				9C7A3B1118C806E00070BB5F /* maple_helper.cpp in Sources */,
+				B3C762012078138F009950E4 /* OERingBuffer.m in Sources */,
 				849C0D6E1B072D14008BAAA4 /* gdrom_hle.cpp in Sources */,
 				9C7A3AD018C806E00070BB5F /* zip_fopen.c in Sources */,
 				84967C911B8F492C005F1140 /* filter_neon_intrinsics.c in Sources */,
@@ -2339,7 +2368,6 @@
 				B30B79F62074D1F4001290A1 /* serial.cpp in Sources */,
 				B30B79CC2074D1F4001290A1 /* zip_set_file_comment.c in Sources */,
 				B30B7A0A2074D1F4001290A1 /* zip_unchange_data.c in Sources */,
-				B30B79D22074D1F4001290A1 /* audiobackend_coreaudio.cpp in Sources */,
 				B30B7A192074D1F5001290A1 /* zip_unchange_archive.c in Sources */,
 				B30B79CF2074D1F4001290A1 /* filter_neon.S in Sources */,
 				B30B79D72074D1F4001290A1 /* SideDrawerViewController.m in Sources */,
@@ -2389,6 +2417,7 @@
 				B30B798A2074D1F4001290A1 /* decoder.cpp in Sources */,
 				B30B79DE2074D1F4001290A1 /* sb_mem.cpp in Sources */,
 				B30B79EF2074D1F4001290A1 /* mmu.cpp in Sources */,
+				B3C762002078138F009950E4 /* TPCircularBuffer.c in Sources */,
 				B30B7A9C2074D835001290A1 /* GCDWebServerResponse.m in Sources */,
 				B30B79DA2074D1F4001290A1 /* maple_if.cpp in Sources */,
 				B30B7A232074D1F5001290A1 /* InputViewController.m in Sources */,
@@ -2405,6 +2434,7 @@
 				B30B79F02074D1F4001290A1 /* zip_stat_init.c in Sources */,
 				B30B79FB2074D1F4001290A1 /* zip_source_file.c in Sources */,
 				B30B7A352074D1F5001290A1 /* gdromv3.cpp in Sources */,
+				B3C762022078138F009950E4 /* OERingBuffer.m in Sources */,
 				B30B79ED2074D1F4001290A1 /* zip_filerange_crc.c in Sources */,
 				B30B7A272074D1F5001290A1 /* elf64.cpp in Sources */,
 				B30B799E2074D1F4001290A1 /* reios.cpp in Sources */,
@@ -2416,6 +2446,7 @@
 				B30B7A2B2074D1F5001290A1 /* sb.cpp in Sources */,
 				B30B798C2074D1F4001290A1 /* SettingsViewController.m in Sources */,
 				B30B79D82074D1F4001290A1 /* chdr.cpp in Sources */,
+				B3C76204207813C0009950E4 /* audiobackend_coreaudio.mm in Sources */,
 				B30B7AAB2074D835001290A1 /* PVWebServer.m in Sources */,
 				B30B7AA02074D835001290A1 /* GCDWebServerConnection.m in Sources */,
 				B30B79C32074D1F4001290A1 /* zip_error_get.c in Sources */,
@@ -2445,6 +2476,7 @@
 				B30B79FC2074D1F4001290A1 /* zip_memdup.c in Sources */,
 				B30B7A072074D1F4001290A1 /* sh4_interpreter.cpp in Sources */,
 				B30B798F2074D1F4001290A1 /* ta_vtx.cpp in Sources */,
+				B3C761FE2078138F009950E4 /* OEGameAudio.m in Sources */,
 				B30B7A092074D1F4001290A1 /* descrambl.cpp in Sources */,
 				B30B79C72074D1F4001290A1 /* mkstemp.c in Sources */,
 				B30B799F2074D1F4001290A1 /* zip_delete.c in Sources */,

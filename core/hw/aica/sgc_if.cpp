@@ -1,4 +1,4 @@
-﻿#include "sgc_if.h"
+#include "sgc_if.h"
 #include "dsp.h"
 #include "aica_mem.h"
 #include "hw/aica/aica_if.h"
@@ -1168,11 +1168,11 @@ void WriteCommonReg8(u32 reg,u32 data)
 s16 cdda_sector[CDDA_SIZE]={0};
 u32 cdda_index=CDDA_SIZE<<1;
 
-
-static SampleType mxlr[64];
+#define RINGS 4
+static SampleType mxlrRings[RINGS * 64];
 
 u32 samples_gen;
-
+u32 bufferCount = 0;
 //no DSP for now in this version
 void AICA_Sample32()
 {
@@ -1181,7 +1181,12 @@ void AICA_Sample32()
 		return;
 	}
 
-	memset(mxlr,0,sizeof(mxlr));
+	u32 ringNumber = bufferCount % RINGS;
+	SampleType mxlr[64];
+	*mxlr = mxlrRings[ringNumber * 64];
+	ringNumber++;
+
+	memset(&mxlr,0,sizeof(mxlr));
 
 	//Generate 32 samples for each channel, before moving to next channel
 	//much more cache efficient !

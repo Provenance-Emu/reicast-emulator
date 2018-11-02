@@ -438,7 +438,7 @@ void recSh4_Init()
 	CodeCache = (u8*)(((unat)SH4_TCB+4095)& ~4095);
 #endif
 
-#define JM_HACKS 0
+#define JM_HACKS 1
 
 #if HOST_OS == OS_DARWIN
 //    syscall(26, 0, 0, 0, 0);

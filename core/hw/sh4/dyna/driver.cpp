@@ -437,11 +437,14 @@ void recSh4_Init()
 #else
 	CodeCache = (u8*)(((unat)SH4_TCB+4095)& ~4095);
 #endif
-    
+
+#define JM_HACKS 0
+
 #if HOST_OS == OS_DARWIN
 //    syscall(26, 0, 0, 0, 0);
     munmap(CodeCache, CODE_SIZE);
 
+#if JM_HACKS
     FILE *fd = tmpfile();//fopen(mktemp("test"), "rw"); //tmpfile(); //fopen(NSTemporaryDirectory(), "r");
     fseek(fd, 0, SEEK_END);
     int len = (int)ftell(fd);
@@ -459,6 +462,9 @@ void recSh4_Init()
     bzero(test, CODE_SIZE);
     CodeCache = (u8*)test;
     CodeCache = (u8*)mmap(test, CODE_SIZE, PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANON, len, 0);
+#else
+    CodeCache = (u8*)mmap(CodeCache, CODE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANON, 0, 0);
+#endif
 #endif
 
 #if HOST_OS == OS_WINDOWS
@@ -478,9 +484,13 @@ void recSh4_Init()
 	#endif
 
 #if defined(TARGET_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)
+#if JM_HACKS
 //    syscall(SYS_ptrace, 0, 0, 0, 0);
             memset((u8*)mmap(CodeCache, CODE_SIZE, PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANON, 0, 0),0xFF,CODE_SIZE);
 //    memset((u8*)mmap(CodeCache, CODE_SIZE, PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0),0xFF,CODE_SIZE);
+#else
+    memset((u8*)mmap(CodeCache, CODE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_FIXED | MAP_PRIVATE | MAP_ANON, 0, 0),0xFF,CODE_SIZE);
+#endif
 #else
 	memset(CodeCache,0xFF,CODE_SIZE);
 #endif

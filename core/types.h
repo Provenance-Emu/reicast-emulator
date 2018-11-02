@@ -21,7 +21,7 @@
 	#define DYNACALL __attribute__((fastcall))
 	#endif
 #elif defined(TARGET_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)
-	#define DYNACALL
+	#define DYNACALL __attribute__((fastcall))
 #else
 	#define DYNACALL
 #endif

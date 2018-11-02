@@ -280,7 +280,7 @@ void os_DebugBreak()
 
 void enable_runfast()
 {
-	#if HOST_CPU==CPU_ARM && !defined(ARMCC) && !defined(TARGET_IPHONE)
+	#if HOST_CPU==CPU_ARM && !defined(ARMCC) && !defined(TARGET_IPHONE) && !defined(TARGET_IPHONE_SIMULATOR)
 	static const unsigned int x = 0x04086060;
 	static const unsigned int y = 0x03000000;
 	int r;

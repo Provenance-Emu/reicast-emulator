@@ -3,15 +3,20 @@
 
 
 #ifdef GLES
-#if defined(TARGET_IPHONE) || defined(TARGET_IPHONE_SIMULATOR) //apple-specific ogles2 headers
-#include <OpenGLES/ES3/gl.h>
-#include <OpenGLES/ES3/glext.h>
-#else
-#if !defined(TARGET_NACL32)
-#include <EGL/egl.h>
-#endif
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+    #if TARGET_IPHONE || TARGET_IPHONE_SIMULATOR //apple-specific ogles2 headers
+        #include <OpenGLES/ES3/gl.h>
+        #include <OpenGLES/ES3/glext.h>
+    #else
+        #if TARGET_OS_MACCATALYST
+            #include <OpenGL/OpenGL.h>
+            #include <GLUT/GLUT.h>
+        #elif !defined(TARGET_NACL32)
+            #include <EGL/egl.h>
+        #else
+            #include <GLES2/gl2.h>
+            #include <GLES2/gl2ext.h>
+        #endif
+    #endif
 #endif
 
 #ifndef GL_NV_draw_path

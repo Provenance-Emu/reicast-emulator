@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Lounge Katt. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 #import <sys/syscall.h>
 
 #import "AppDelegate.h"

@@ -6,7 +6,7 @@
 //  Copyright © 2018 reicast. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 

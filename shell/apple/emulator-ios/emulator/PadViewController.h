@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 reicast. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 #import "EmulatorView.h"
 
 @interface PadViewController : UIViewController

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Karen Tsai (angelXwind). All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
 @interface BrowserTableViewController : UITableViewController {
     NSArray *games;

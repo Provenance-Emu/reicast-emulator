@@ -7,9 +7,10 @@
         #include <OpenGLES/ES3/gl.h>
         #include <OpenGLES/ES3/glext.h>
     #else
-        #if TARGET_OS_MACCATALYST
+        #if TARGET_OS_MACCATALYST || TARGET_OS_OSX
             #include <OpenGL/OpenGL.h>
             #include <GLUT/GLUT.h>
+            #include <OpenGL/gl3.h>
         #elif !defined(TARGET_NACL32)
             #include <EGL/egl.h>
         #else
@@ -26,15 +27,6 @@
 #else /* NV gles emulation*/
 #pragma comment(lib,"libGLES20.lib")
 #endif
-
-#else
-#if HOST_OS == OS_DARWIN
-    #include <OpenGL/gl3.h>
-#else
-	#include <GL3/gl3w.h>
-#endif
-#endif
-
 
 #define glCheck() do { if (unlikely(settings.validate.OpenGlChecks)) { verify(glGetError()==GL_NO_ERROR); } } while(0)
 #define eglCheck() false

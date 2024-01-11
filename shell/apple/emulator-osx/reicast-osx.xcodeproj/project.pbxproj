@@ -1699,7 +1699,7 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+				  "$(TOOLCHAIN_DIR)/usr/include",
 					../../../core/deps,
 					../../../core,
 					../../../core/khronos,
@@ -1728,7 +1728,7 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					$(TOOLCHAIN_DIR)/usr/include,
 					../../../core/deps,
 					../../../core,
 					../../../core/khronos,

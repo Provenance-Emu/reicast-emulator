@@ -2619,7 +2619,7 @@
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					$(TOOLCHAIN_DIR)/usr/include,
 					"../../../core/hw/**",
 					../../../core,
 					"../../../core/deps/**",
@@ -2677,7 +2677,7 @@
 				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					$(TOOLCHAIN_DIR)/usr/include,
 					"../../../core/hw/**",
 					../../../core,
 					"../../../core/deps/**",
@@ -2774,7 +2774,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					$(TOOLCHAIN_DIR)/usr/include,
 					"../../../core/hw/**",
 					../../../core,
 					"../../../core/deps/**",
@@ -2856,7 +2856,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					$(TOOLCHAIN_DIR)/usr/include,
 					"../../../core/hw/**",
 					../../../core,
 					"../../../core/deps/**",

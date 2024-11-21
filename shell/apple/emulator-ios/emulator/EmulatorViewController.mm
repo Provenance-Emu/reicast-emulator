@@ -54,9 +54,16 @@ bool rend_single_frame();
 bool gles_init();
 extern "C" int reicast_main(int argc, char* argv[]);
 
+@interface NSThread (RealtimePriority)
+
++ (BOOL)setCurrentThreadRealtimePriority;
+
+@end
+
+
 void MakeCurrentThreadRealTime()
 {
-//    [NSThread setRealTimePriority];
+    [NSThread setCurrentThreadRealtimePriority];
 }
 
 @implementation EmulatorViewController
@@ -64,7 +71,7 @@ void MakeCurrentThreadRealTime()
 -(void)emuThread
 {
 //    #if !TARGET_OS_SIMULATOR
-    install_prof_handler(1);
+//    install_prof_handler(1);
  //   #endif
     
 	char *Args[3];
@@ -132,7 +139,7 @@ void MakeCurrentThreadRealTime()
 	[self addChildViewController:self.controllerView];
 	self.controllerView.view.frame = self.view.bounds;
 	self.controllerView.view.translatesAutoresizingMaskIntoConstraints = YES;
-	self.controllerView.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleWidth;
+    self.controllerView.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	[self.view addSubview:self.controllerView.view];
 	[self.controllerView didMoveToParentViewController:self];
 #endif
@@ -548,6 +555,43 @@ void MakeCurrentThreadRealTime()
 	}
 
 	return shaderProgram;
+}
+
+@end
+
+#import <Foundation/Foundation.h>
+#import <pthread.h>
+#import <mach/mach.h>
+#import <mach/mach_time.h>
+
+
+@implementation NSThread (RealtimePriority)
+
++ (BOOL)setCurrentThreadRealtimePriority {
+    struct mach_timebase_info timebase;
+    mach_timebase_info(&timebase);
+    
+    // Convert to nanoseconds
+    double period = 10 * 1000000; // 10 milliseconds
+    uint64_t computation = (uint64_t)(period * (double)timebase.denom / (double)timebase.numer);
+    uint64_t constraint = (uint64_t)(period * (double)timebase.denom / (double)timebase.numer);
+    
+    thread_time_constraint_policy_data_t policy;
+    policy.period = computation;
+    policy.computation = computation;
+    policy.constraint = constraint;
+    policy.preemptible = 1;
+    
+    mach_port_t thread = pthread_mach_thread_np(pthread_self());
+    
+    kern_return_t result = thread_policy_set(
+        thread,
+        THREAD_TIME_CONSTRAINT_POLICY,
+        (thread_policy_t)&policy,
+        THREAD_TIME_CONSTRAINT_POLICY_COUNT
+    );
+    
+    return result == KERN_SUCCESS;
 }
 
 @end

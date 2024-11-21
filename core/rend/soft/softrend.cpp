@@ -811,6 +811,67 @@ static void Rendtriangle(PolyParam* pp, int vertex_offset, const Vertex &v1, con
 	}
 }
 
+#if defined(__arm64__) || defined(__aarch64__)
+#include <arm_neon.h>
+
+// NEON optimized triangle fill
+static inline void FillTriangleNeon(const Vertex& v1, const Vertex& v2, const Vertex& v3, 
+                                  u32* colorBuffer, float* depthBuffer, const RECT* area) {
+    float32x4_t vx = {v1.x, v2.x, v3.x, 0};
+    float32x4_t vy = {v1.y, v2.y, v3.y, 0};
+    
+    // Calculate bounding box
+    float32x2_t vminxy = vmin_f32(vget_low_f32(vx), vget_low_f32(vy));
+    float32x2_t vmaxxy = vmax_f32(vget_low_f32(vx), vget_low_f32(vy));
+    
+    int minx = max((int)vminxy[0], area->left);
+    int miny = max((int)vminxy[1], area->top);
+    int maxx = min((int)vmaxxy[0], area->right);
+    int maxy = min((int)vmaxxy[1], area->bottom);
+    
+    // Edge vectors
+    float32x4_t edge1 = {v2.x - v1.x, v2.y - v1.y, 0, 0};
+    float32x4_t edge2 = {v3.x - v2.x, v3.y - v2.y, 0, 0};
+    float32x4_t edge3 = {v1.x - v3.x, v1.y - v3.y, 0, 0};
+    
+    // Process 4 pixels at a time using NEON
+    for (int y = miny; y < maxy; y += 1) {
+        for (int x = minx; x < maxx; x += 4) {
+            float32x4_t px = {(float)x, (float)(x+1), (float)(x+2), (float)(x+3)};
+            float32x4_t py = vdupq_n_f32((float)y);
+            
+            // Calculate barycentric coordinates using NEON
+            float32x4_t w0 = EdgeFunction(edge1, px - v1.x, py - v1.y);
+            float32x4_t w1 = EdgeFunction(edge2, px - v2.x, py - v2.y);
+            float32x4_t w2 = EdgeFunction(edge3, px - v3.x, py - v3.y);
+            
+            // Check if inside triangle
+            uint32x4_t inside = vandq_u32(
+                vcgeq_f32(w0, vdupq_n_f32(0.0f)),
+                vandq_u32(
+                    vcgeq_f32(w1, vdupq_n_f32(0.0f)),
+                    vcgeq_f32(w2, vdupq_n_f32(0.0f))
+                )
+            );
+            
+            // Store results for pixels inside triangle
+            if (vgetq_lane_u32(inside, 0)) colorBuffer[x + y * STRIDE_PIXEL_OFFSET] = v1.col;
+            if (vgetq_lane_u32(inside, 1)) colorBuffer[x + 1 + y * STRIDE_PIXEL_OFFSET] = v1.col;
+            if (vgetq_lane_u32(inside, 2)) colorBuffer[x + 2 + y * STRIDE_PIXEL_OFFSET] = v1.col;
+            if (vgetq_lane_u32(inside, 3)) colorBuffer[x + 3 + y * STRIDE_PIXEL_OFFSET] = v1.col;
+        }
+    }
+}
+
+// NEON optimized edge function
+static inline float32x4_t EdgeFunction(const float32x4_t& edge, float32x4_t px, float32x4_t py) {
+    return vsubq_f32(
+        vmulq_f32(vdupq_n_f32(edge[0]), py),
+        vmulq_f32(vdupq_n_f32(edge[1]), px)
+    );
+}
+#endif
+
 #if HOST_OS == OS_WINDOWS
 	BITMAPINFOHEADER bi = { sizeof(BITMAPINFOHEADER), 0, 0, 1, 32, BI_RGB };
 #endif
@@ -868,6 +929,35 @@ struct softrend : Renderer
 		if (pvrrc.isAutoSort)
 			SortPParams();
 
+#if defined(__arm64__) || defined(__aarch64__)
+		// Use NEON optimized rendering on ARM64
+		int tcount = omp_get_num_procs() - 1;
+		if (tcount == 0) tcount = 1;
+		if (tcount > settings.pvr.MaxThreads) tcount = settings.pvr.MaxThreads;
+    
+		#pragma omp parallel num_threads(tcount)
+		{
+			int thd = omp_get_thread_num();
+			int y_offs = 480 % omp_get_num_threads();
+			int y_thd = 480 / omp_get_num_threads();
+			int y_start = (!!thd) * y_offs + y_thd * thd;
+			int y_end = y_offs + y_thd * (thd + 1);
+
+			RECT area = { 0, y_start, 640, y_end };
+        
+			// Process triangle lists using NEON
+			for (size_t i = 0; i < pvrrc.global_param_tr.used(); i++) {
+				PolyParam* params = &pvrrc.global_param_tr.data[i];
+				for (size_t j = 0; j < params->count - 2; j++) {
+					Vertex& v1 = pvrrc.verts[params->first + j];
+					Vertex& v2 = pvrrc.verts[params->first + j + 1];
+					Vertex& v3 = pvrrc.verts[params->first + j + 2];
+					FillTriangleNeon(v1, v2, v3, render_buffer, depth_buffer, &area);
+				}
+			}
+		}
+#else
+		// Original non-NEON code
 		int tcount = omp_get_num_procs() - 1;
 		if (tcount == 0) tcount = 1;
 		if (tcount > settings.pvr.MaxThreads) tcount = settings.pvr.MaxThreads;
@@ -884,9 +974,7 @@ struct softrend : Renderer
 			RenderParamList<1>(&pvrrc.global_param_pt, &area);
 			RenderParamList<2>(&pvrrc.global_param_tr, &area);
 		}
-
-
-
+#endif
 
 		/*
 		for (int y = 0; y < 480; y++) {

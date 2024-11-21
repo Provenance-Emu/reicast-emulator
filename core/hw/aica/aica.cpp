@@ -164,7 +164,7 @@ void libAICA_Update(u32 Samples)
 
 void libAICA_TimeStep()
 {
-#if 0 // the original code
+#if 1 // the original code
 	for (int i=0;i<3;i++)
 		timers[i].StepTimer(1);
 

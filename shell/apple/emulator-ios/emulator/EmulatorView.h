@@ -7,6 +7,7 @@
 //
 
 #import <GLKit/GLKit.h>
+#import <UIKit/UIKit.h>
 
 
 #define DC_BTN_C		(1)

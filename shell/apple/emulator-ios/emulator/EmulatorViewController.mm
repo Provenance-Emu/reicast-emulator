@@ -7,7 +7,7 @@
 //
 
 #import "EmulatorViewController.h"
-
+//#import <PVSupport/PVSupport-Swift.h>
 
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>
@@ -56,7 +56,7 @@ extern "C" int reicast_main(int argc, char* argv[]);
 
 void MakeCurrentThreadRealTime()
 {
-    [NSThread setRealTimePriority];
+//    [NSThread setRealTimePriority];
 }
 
 @implementation EmulatorViewController

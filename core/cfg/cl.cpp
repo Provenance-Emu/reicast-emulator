@@ -100,7 +100,7 @@ int setconfig(wchar** arg,int cl)
 }
 
 #ifndef _ANDROID
-#include "version.h"
+#define REICAST_VERSION "ios-joemattiello"
 #else
 #define REICAST_VERSION "r7-android-tmp"
 #endif

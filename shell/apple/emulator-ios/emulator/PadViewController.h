@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
 #import "EmulatorView.h"
 
 @interface PadViewController : UIViewController

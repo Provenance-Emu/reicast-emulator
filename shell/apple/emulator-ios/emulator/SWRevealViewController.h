@@ -74,6 +74,7 @@
 
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class SWRevealViewController;
 @protocol SWRevealViewControllerDelegate;

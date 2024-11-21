@@ -8,6 +8,7 @@
 
 #import "PVWebServer.h"
 
+#import <UIKit/UIKit.h>
 @import Darwin.POSIX.ifaddrs;
 // Web Server
 #import "GCDWebUploader.h"

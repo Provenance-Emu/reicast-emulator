@@ -471,6 +471,23 @@
 		B3167F4A20743BC600A68303 /* gles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A3A8F18C806E00070BB5F /* gles.cpp */; };
 		B3167F4C20743C4800A68303 /* libpthread.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B3167F4B20743C4800A68303 /* libpthread.tbd */; };
 		B35D27DF2033EB7600F17D58 /* rec_cpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B35D27DE2033EB7600F17D58 /* rec_cpp.cpp */; };
+		B36079CC2CEED3DE00028BA4 /* PVWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A9A2074D832001290A1 /* PVWebServer.m */; };
+		B36079CD2CEED43A00028BA4 /* GCDWebUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A992074D832001290A1 /* GCDWebUploader.m */; };
+		B36079CE2CEED43E00028BA4 /* GCDWebUploader.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B30B7A972074D832001290A1 /* GCDWebUploader.bundle */; };
+		B36079CF2CEED44600028BA4 /* GCDWebServerURLEncodedFormRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A902074D832001290A1 /* GCDWebServerURLEncodedFormRequest.m */; };
+		B36079D02CEED44600028BA4 /* GCDWebServerDataRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A922074D832001290A1 /* GCDWebServerDataRequest.m */; };
+		B36079D12CEED44600028BA4 /* GCDWebServerFileRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A932074D832001290A1 /* GCDWebServerFileRequest.m */; };
+		B36079D22CEED44600028BA4 /* GCDWebServerMultiPartFormRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A912074D832001290A1 /* GCDWebServerMultiPartFormRequest.m */; };
+		B36079D32CEED44D00028BA4 /* GCDWebServerDataResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A892074D831001290A1 /* GCDWebServerDataResponse.m */; };
+		B36079D42CEED44D00028BA4 /* GCDWebServerErrorResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A862074D831001290A1 /* GCDWebServerErrorResponse.m */; };
+		B36079D52CEED44D00028BA4 /* GCDWebServerFileResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A882074D831001290A1 /* GCDWebServerFileResponse.m */; };
+		B36079D62CEED44D00028BA4 /* GCDWebServerStreamedResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A8B2074D831001290A1 /* GCDWebServerStreamedResponse.m */; };
+		B36079D72CEED45700028BA4 /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A812074D831001290A1 /* GCDWebServerConnection.m */; };
+		B36079D82CEED45700028BA4 /* GCDWebServerResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A792074D831001290A1 /* GCDWebServerResponse.m */; };
+		B36079D92CEED45700028BA4 /* GCDWebServerFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A7F2074D831001290A1 /* GCDWebServerFunctions.m */; };
+		B36079DA2CEED45700028BA4 /* GCDWebServerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A7C2074D831001290A1 /* GCDWebServerRequest.m */; };
+		B36079DB2CEED45700028BA4 /* GCDWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A802074D831001290A1 /* GCDWebServer.m */; };
+		B36079DC2CEED45C00028BA4 /* GCDWebDAVServer.m in Sources */ = {isa = PBXBuildFile; fileRef = B30B7A742074D831001290A1 /* GCDWebDAVServer.m */; };
 		B3C761F42078111F009950E4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3C761F32078111E009950E4 /* AVKit.framework */; };
 		B3C761F620781125009950E4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3C761F520781125009950E4 /* AVFoundation.framework */; };
 		B3C761FD2078138F009950E4 /* OEGameAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = B3C761F82078138E009950E4 /* OEGameAudio.m */; };
@@ -859,8 +876,8 @@
 		9C7A3B5718C81A4F0070BB5F /* SWRevealViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWRevealViewController.h; sourceTree = "<group>"; };
 		9C7A3B5818C81A4F0070BB5F /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
 		9C7A3BC318C84EA10070BB5F /* MainStoryboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard.storyboard; sourceTree = "<group>"; };
-		B30B796A2074C538001290A1 /* crt_fragment.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = crt_fragment.glsl; path = "../../../../../../Provenance/Provenance-jmattiello/Provenance/shaders/crt/crt_fragment.glsl"; sourceTree = "<group>"; };
-		B30B796C2074C580001290A1 /* default_vertex.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = default_vertex.glsl; path = "../../../../../../Provenance/Provenance-jmattiello/Provenance/shaders/default/default_vertex.glsl"; sourceTree = "<group>"; };
+		B30B796A2074C538001290A1 /* crt_fragment.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = crt_fragment.glsl; path = ../../../../../../../PVUI/Sources/PVUIBase/Resources/Shaders/GLES/Filters/crt_fragment.glsl; sourceTree = "<group>"; };
+		B30B796C2074C580001290A1 /* default_vertex.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = default_vertex.glsl; path = ../../../../../../../PVUI/Sources/PVUIBase/Resources/Shaders/GLES/Vertex/default_vertex.glsl; sourceTree = "<group>"; };
 		B30B79722074D1C1001290A1 /* reicast-tvos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "reicast-tvos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B30B79742074D1C2001290A1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		B30B79752074D1C2001290A1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -1955,7 +1972,7 @@
 				ORGANIZATIONNAME = reicast;
 				TargetAttributes = {
 					87078A8218A47FE90034C7A0 = {
-						DevelopmentTeam = V78REPMQFZ;
+						DevelopmentTeam = S32Z3HMYVQ;
 					};
 					B30B79712074D1C1001290A1 = {
 						CreatedOnToolsVersion = 9.3;
@@ -1969,6 +1986,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -2012,6 +2030,7 @@
 				B30B796B2074C538001290A1 /* crt_fragment.glsl in Resources */,
 				87078AA318A47FE90034C7A0 /* Shader.fsh in Resources */,
 				9C7A3BC418C84EA10070BB5F /* MainStoryboard.storyboard in Resources */,
+				B36079CE2CEED43E00028BA4 /* GCDWebUploader.bundle in Resources */,
 				87D92F381B7A1B4800D8FD9E /* 210-octocat@2x.png in Resources */,
 				87D92F431B7A1B4800D8FD9E /* LTrigger.png in Resources */,
 				87D92F3E1B7A1B4800D8FD9E /* DPad@2x.png in Resources */,
@@ -2111,6 +2130,11 @@
 				9C7A3B4318C806E00070BB5F /* profiler.cpp in Sources */,
 				9C7A3B0718C806E00070BB5F /* vbaARM.cpp in Sources */,
 				9C7A3AD218C806E00070BB5F /* zip_fread.c in Sources */,
+				B36079D72CEED45700028BA4 /* GCDWebServerConnection.m in Sources */,
+				B36079D82CEED45700028BA4 /* GCDWebServerResponse.m in Sources */,
+				B36079D92CEED45700028BA4 /* GCDWebServerFunctions.m in Sources */,
+				B36079DA2CEED45700028BA4 /* GCDWebServerRequest.m in Sources */,
+				B36079DB2CEED45700028BA4 /* GCDWebServer.m in Sources */,
 				9C7A3B0418C806E00070BB5F /* sgc_if.cpp in Sources */,
 				9C7A3B2A18C806E00070BB5F /* rtc.cpp in Sources */,
 				877652C41B6157BD00437F10 /* audiobackend_oss.cpp in Sources */,
@@ -2147,6 +2171,7 @@
 				877652C61B6157BD00437F10 /* audiostream.cpp in Sources */,
 				877652C51B6157BD00437F10 /* audiobackend_pulseaudio.cpp in Sources */,
 				B30B7967207480E1001290A1 /* shil.cpp in Sources */,
+				B36079CC2CEED3DE00028BA4 /* PVWebServer.m in Sources */,
 				9C7A3ABD18C806E00070BB5F /* zip_add_dir.c in Sources */,
 				87D92F541B7A1BB100D8FD9E /* iCadeReaderView.m in Sources */,
 				84967C941B8F492C005F1140 /* pngget.c in Sources */,
@@ -2187,7 +2212,12 @@
 				9C7A3B0E18C806E00070BB5F /* sb_mem.cpp in Sources */,
 				9C7A3B2C18C806E00070BB5F /* tmu.cpp in Sources */,
 				9C7A3B4C18C806E00070BB5F /* TexCache.cpp in Sources */,
+				B36079D32CEED44D00028BA4 /* GCDWebServerDataResponse.m in Sources */,
+				B36079D42CEED44D00028BA4 /* GCDWebServerErrorResponse.m in Sources */,
+				B36079D52CEED44D00028BA4 /* GCDWebServerFileResponse.m in Sources */,
+				B36079D62CEED44D00028BA4 /* GCDWebServerStreamedResponse.m in Sources */,
 				9C7A3B1618C806E00070BB5F /* pvr_regs.cpp in Sources */,
+				B36079DC2CEED45C00028BA4 /* GCDWebDAVServer.m in Sources */,
 				87C208DA1B7A4BFA00638BDD /* EmulatorView.mm in Sources */,
 				9C7A3ACB18C806E00070BB5F /* zip_file_error_clear.c in Sources */,
 				9C7A3ACE18C806E00070BB5F /* zip_file_strerror.c in Sources */,
@@ -2199,6 +2229,10 @@
 				84967C991B8F492C005F1140 /* pngrtran.c in Sources */,
 				9C7A3AD618C806E00070BB5F /* zip_get_file_comment.c in Sources */,
 				84967C981B8F492C005F1140 /* pngrio.c in Sources */,
+				B36079CF2CEED44600028BA4 /* GCDWebServerURLEncodedFormRequest.m in Sources */,
+				B36079D02CEED44600028BA4 /* GCDWebServerDataRequest.m in Sources */,
+				B36079D12CEED44600028BA4 /* GCDWebServerFileRequest.m in Sources */,
+				B36079D22CEED44600028BA4 /* GCDWebServerMultiPartFormRequest.m in Sources */,
 				9C7A3AEA18C806E00070BB5F /* zip_stat_index.c in Sources */,
 				9C7A3ACF18C806E00070BB5F /* zip_filerange_crc.c in Sources */,
 				87C208DD1B7A4BFA00638BDD /* PathsViewController.m in Sources */,
@@ -2279,6 +2313,7 @@
 				9C7A3B3418C806E00070BB5F /* sh4_sched.cpp in Sources */,
 				87C208DB1B7A4BFA00638BDD /* EmulatorViewController.mm in Sources */,
 				B30B796920748118001290A1 /* blockmanager.cpp in Sources */,
+				B36079CD2CEED43A00028BA4 /* GCDWebUploader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2588,7 +2623,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = V78REPMQFZ;
+				DEVELOPMENT_TEAM = S32Z3HMYVQ;
 				ENABLE_BITCODE = NO;
 				ENABLE_TESTABILITY = YES;
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
@@ -2646,7 +2681,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = V78REPMQFZ;
+				DEVELOPMENT_TEAM = S32Z3HMYVQ;
 				ENABLE_BITCODE = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2689,8 +2724,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
-					"-mno-thumb",
-					"-mfpu=neon",
 					"-fno-operator-names",
 					"-fno-rtti",
 					"-ffast-math",

@@ -119,8 +119,8 @@ void UpdateVibration(u32 port, u32 value) {
 
 }
 
-void get_mic_data(u8* ) {
-
+int get_mic_data(u8* ) {
+    return 0;
 }
 
 void* libPvr_GetRenderTarget() {

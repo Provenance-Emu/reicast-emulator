@@ -164,6 +164,7 @@ void libAICA_Update(u32 Samples)
 
 void libAICA_TimeStep()
 {
+#if 0 // the original code
 	for (int i=0;i<3;i++)
 		timers[i].StepTimer(1);
 
@@ -174,7 +175,29 @@ void libAICA_TimeStep()
 
 	//Make sure sh4/arm interrupt system is up to date :)
 	update_arm_interrupts();
-	UpdateSh4Ints();	
+	UpdateSh4Ints();
+#else // Provenace code
+    // Only step timers and generate samples if we've accumulated enough CPU cycles
+    static u32 cycleCount = 0;
+    cycleCount++;
+    
+    // The Dreamcast CPU runs at ~200MHz, AICA at 44.1kHz
+    // So we want to generate samples every ~4535 cycles (200MHz/44.1kHz)
+    if (cycleCount >= 4535) {
+        cycleCount = 0;
+        
+        for (int i=0; i<3; i++)
+            timers[i].StepTimer(1);
+            
+        SCIPD->SAMPLE_DONE=1;
+        
+        if (settings.aica.NoBatch)
+            AICA_Sample();
+            
+        update_arm_interrupts();
+        UpdateSh4Ints();
+    }
+#endif
 }
 
 //Memory i/o

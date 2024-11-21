@@ -86,10 +86,10 @@ uniform highp float sp_FOG_DENSITY; \n\
 " attr " highp vec4    in_pos; \n\
 " attr " lowp vec4     in_base; \n\
 " attr " lowp vec4     in_offs; \n\
-" attr " mediump vec2  in_uv; \n\
+" attr " highp vec2  in_uv; \n\
 /* output */ \n\
-" vary " lowp vec4 vtx_base; \n\
-" vary " lowp vec4 vtx_offs; \n\
+" vary " highp vec4 vtx_base; \n\
+" vary " highp vec4 vtx_offs; \n\
 " vary " mediump vec2 vtx_uv; \n\
 " vary " highp vec3 vtx_xyz; \n\
 void main() \n\
@@ -954,7 +954,7 @@ bool gl_create_resources()
 	gl.OSD_SHADER.depth_scale=glGetUniformLocation(gl.OSD_SHADER.program, "depth_scale");
 	glUniform1i(glGetUniformLocation(gl.OSD_SHADER.program, "tex"),0);		//bind osd texture to slot 0
 
-	//#define PRECOMPILE_SHADERS
+	#define PRECOMPILE_SHADERS
 	#ifdef PRECOMPILE_SHADERS
 	for (u32 i=0;i<sizeof(gl.pogram_table)/sizeof(gl.pogram_table[0]);i++)
 	{
@@ -1003,6 +1003,7 @@ bool gles_init()
 	eglSwapInterval(gl.setup.display,1);
 	#endif
 #endif
+    glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
 
 	//clean up all buffers ...
 	for (int i=0;i<10;i++)

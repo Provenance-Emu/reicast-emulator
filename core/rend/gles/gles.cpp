@@ -22,13 +22,6 @@ int fbdev = -1;
 #endif
 #endif
 
-#ifndef GL_RED
-#define GL_RED                            0x1903
-#endif
-#ifndef GL_MAJOR_VERSION
-#define GL_MAJOR_VERSION                  0x821B
-#endif
-
 /*
 GL|ES 2
 Slower, smaller subset of gl2
@@ -68,56 +61,58 @@ Tile clip
 void GenSorted();
 
 float fb_scale_x,fb_scale_y;
-float scale_x, scale_y;
 
+#ifndef GLES
+#define attr "in"
+#define vary "out"
+#else
+#define attr "attribute"
+#define vary "varying"
+#endif
 #if 1
 
 //Fragment and vertex shaders code
 //pretty much 1:1 copy of the d3d ones for now
 const char* VertexShaderSource =
-"%s \n\
- \n\
-#define TARGET_GL %s \n\
- \n\
-#define GLES2 0 \n\
-#define GLES3 1 \n\
-#define GL2 2 \n\
-#define GL3 3 \n\
- \n\
-#if TARGET_GL == GLES2 || TARGET_GL == GL2 \n\
-#define in attribute \n\
-#define out varying \n\
-#endif \n\
- \n\
+#ifndef GLES
+	"#version 140 \n"
+#endif
+"\
 /* Vertex constants*/  \n\
 uniform highp vec4      scale; \n\
 uniform highp vec4      depth_scale; \n\
+uniform highp float sp_FOG_DENSITY; \n\
 /* Vertex input */ \n\
-in highp vec4    in_pos; \n\
-in lowp vec4     in_base; \n\
-in lowp vec4     in_offs; \n\
-in mediump vec2  in_uv; \n\
+" attr " highp vec4    in_pos; \n\
+" attr " lowp vec4     in_base; \n\
+" attr " lowp vec4     in_offs; \n\
+" attr " highp vec2  in_uv; \n\
 /* output */ \n\
-out lowp vec4 vtx_base; \n\
-out lowp vec4 vtx_offs; \n\
-out mediump vec2 vtx_uv; \n\
+" vary " highp vec4 vtx_base; \n\
+" vary " highp vec4 vtx_offs; \n\
+" vary " mediump vec2 vtx_uv; \n\
+" vary " highp vec3 vtx_xyz; \n\
 void main() \n\
 { \n\
 	vtx_base=in_base; \n\
 	vtx_offs=in_offs; \n\
 	vtx_uv=in_uv; \n\
 	vec4 vpos=in_pos; \n\
-	vpos.w=1.0/vpos.z;  \n\
-#if TARGET_GL != GLES2 \n\
+	vtx_xyz.xy = vpos.xy;  \n\
+	vtx_xyz.z = vpos.z*sp_FOG_DENSITY;  \n\
+	vpos.w=1.0/vpos.z;  \n"
+#ifndef GLES
+	"\
 	if (vpos.w < 0.0) { \n\
 		gl_Position = vec4(0.0, 0.0, 0.0, vpos.w); \n\
 		return; \n\
 	} \n\
-	vpos.z = vpos.w; \n\
-#else \n\
-	vpos.z=depth_scale.x+depth_scale.y*vpos.w;  \n\
-#endif \n\
-	\n\
+	vpos.z = vpos.w; \n"
+#else
+	"\
+	vpos.z=depth_scale.x+depth_scale.y*vpos.w;  \n"
+#endif
+	"\
 	vpos.xy=vpos.xy*scale.xy-scale.zw;  \n\
 	vpos.xy*=vpos.w;  \n\
 	gl_Position = vpos; \n\
@@ -231,10 +226,22 @@ lowp float fog_mode2(highp float invW)  \n\
 } \n\
 */
 
+#ifndef GLES
+#define FRAGCOL "FragColor"
+#define TEXLOOKUP "texture"
+#define vary "in"
+#else
+#define FRAGCOL "gl_FragColor"
+#define TEXLOOKUP "texture2D"
+#endif
+
+
 const char* PixelPipelineShader =
-"%s \n\
- \n\
-#define TARGET_GL %s \n\
+#ifndef GLES
+	"#version 140 \n"
+	"out vec4 FragColor; \n"
+#endif
+"\
 \
 #define cp_AlphaTest %d \n\
 #define pp_ClipTestMode %d \n\
@@ -244,45 +251,22 @@ const char* PixelPipelineShader =
 #define pp_ShadInstr %d \n\
 #define pp_Offset %d \n\
 #define pp_FogCtrl %d \n\
- \n\
-#define GLES2 0 \n\
-#define GLES3 1 \n\
-#define GL2 2 \n\
-#define GL3 3 \n\
- \n\
-#if TARGET_GL == GLES3 \n\
-out highp vec4 FragColor; \n\
-#define gl_FragColor FragColor \n\
-#define FOG_CHANNEL a \n\
-#elif TARGET_GL == GL3 \n\
-out highp vec4 FragColor; \n\
-#define gl_FragColor FragColor \n\
-#define FOG_CHANNEL r \n\
-#else \n\
-#define in varying \n\
-#define texture texture2D \n\
-#define FOG_CHANNEL a \n\
-#endif \n\
- \n\
 /* Shader program params*/ \n\
 /* gles has no alpha test stage, so its emulated on the shader */ \n\
 uniform lowp float cp_AlphaTestValue; \n\
 uniform lowp vec4 pp_ClipTest; \n\
 uniform lowp vec3 sp_FOG_COL_RAM,sp_FOG_COL_VERT; \n\
-uniform highp float sp_FOG_DENSITY; \n\
+uniform highp vec2 sp_LOG_FOG_COEFS; \n\
 uniform sampler2D tex,fog_table; \n\
 /* Vertex input*/ \n\
-in lowp vec4 vtx_base; \n\
-in lowp vec4 vtx_offs; \n\
-in mediump vec2 vtx_uv; \n\
-lowp float fog_mode2(highp float w) \n\
+" vary " lowp vec4 vtx_base; \n\
+" vary " lowp vec4 vtx_offs; \n\
+" vary " mediump vec2 vtx_uv; \n\
+" vary " highp vec3 vtx_xyz; \n\
+lowp float fog_mode2(highp float val) \n\
 { \n\
-	highp float z = clamp(w * sp_FOG_DENSITY, 1.0, 255.9999); \n\
-	highp float exp = floor(log2(z)); \n\
-	highp float m = z * 16.0 / pow(2.0, exp) - 16.0; \n\
-	lowp float idx = floor(m) + exp * 16.0 + 0.5; \n\
-	highp vec4 fog_coef = texture(fog_table, vec2(idx / 128.0, 0.75 - (m - floor(m)) / 2.0)); \n\
-	return fog_coef.FOG_CHANNEL; \n\
+	highp float fog_idx=clamp(val,0.0,127.99); \n\
+	return clamp(sp_LOG_FOG_COEFS.y*log2(fog_idx)+sp_LOG_FOG_COEFS.x,0.001,1.0); //the clamp is required due to yet another bug !\n\
 } \n\
 void main() \n\
 { \n\
@@ -304,11 +288,11 @@ void main() \n\
 		color.a=1.0; \n\
 	#endif\n\
 	#if pp_FogCtrl==3 \n\
-		color=vec4(sp_FOG_COL_RAM.rgb,fog_mode2(gl_FragCoord.w)); \n\
+		color=vec4(sp_FOG_COL_RAM.rgb,fog_mode2(vtx_xyz.z)); \n\
 	#endif\n\
 	#if pp_Texture==1 \n\
 	{ \n\
-		lowp vec4 texcol=texture(tex,vtx_uv); \n\
+		lowp vec4 texcol=" TEXLOOKUP "(tex,vtx_uv); \n\
 		\n\
 		#if pp_IgnoreTexA==1 \n\
 			texcol.a=1.0;	 \n\
@@ -348,7 +332,7 @@ void main() \n\
 	#endif\n\
 	#if pp_FogCtrl==0 \n\
 	{ \n\
-		color.rgb=mix(color.rgb,sp_FOG_COL_RAM.rgb,fog_mode2(gl_FragCoord.w));  \n\
+		color.rgb=mix(color.rgb,sp_FOG_COL_RAM.rgb,fog_mode2(vtx_xyz.z));  \n\
 	} \n\
 	#endif\n\
 	#if cp_AlphaTest == 1 \n\
@@ -358,133 +342,55 @@ void main() \n\
 		else \n\
 			color.a = 1.0; \n\
 	#endif  \n\
-#if TARGET_GL != GLES2 \n\
+	//color.rgb=vec3(vtx_xyz.z/255.0);\n"
+#ifndef GLES
+	"\
 	highp float w = gl_FragCoord.w * 100000.0; \n\
-	gl_FragDepth = log2(1.0 + w) / 34.0; \n\
-#endif \n\
-	gl_FragColor=color; \n\
+	gl_FragDepth = log2(1.0 + w) / 34.0; \n"
+#endif
+	FRAGCOL "=color; \n\
 }";
 
 const char* ModifierVolumeShader =
-"%s \n\
- \n\
-#define TARGET_GL %s \n\
- \n\
- \n\
-#define GLES2 0 \n\
-#define GLES3 1 \n\
-#define GL2 2 \n\
-#define GL3 3 \n\
- \n\
-#if TARGET_GL != GLES2 && TARGET_GL != GL2 \n\
-out highp vec4 FragColor; \n\
-#define gl_FragColor FragColor \n\
-#endif \n\
- \n\
+#ifndef GLES
+	"#version 140 \n"
+	"out vec4 FragColor; \n"
+#endif
+" \
 uniform lowp float sp_ShaderColor; \n\
 /* Vertex input*/ \n\
 void main() \n\
-{ \n\
-#if TARGET_GL != GLES2 \n\
+{ \n"
+#ifndef GLES
+	"\
 	highp float w = gl_FragCoord.w * 100000.0; \n\
-	gl_FragDepth = log2(1.0 + w) / 34.0; \n\
-#endif \n\
-	gl_FragColor=vec4(0.0, 0.0, 0.0, sp_ShaderColor); \n\
+	gl_FragDepth = log2(1.0 + w) / 34.0; \n"
+#endif
+	FRAGCOL "=vec4(0.0, 0.0, 0.0, sp_ShaderColor); \n\
 }";
 
 const char* OSD_Shader =
-"%s \n\
- \n\
-#define TARGET_GL %s \n\
- \n\
-#define GLES2 0 \n\
-#define GLES3 1 \n\
-#define GL2 2 \n\
-#define GL3 3 \n\
- \n\
-#if TARGET_GL != GLES2 && TARGET_GL != GL2 \n\
-out highp vec4 FragColor; \n\
-#define gl_FragColor FragColor \n\
-#else \n\
-#define in varying \n\
-#define texture texture2D \n\
-#endif \n\
- \n\
-in lowp vec4 vtx_base; \n\
-in mediump vec2 vtx_uv; \n\
+#ifndef GLES
+	"#version 140 \n"
+	"out vec4 FragColor; \n"
+#endif
+" \
+" vary " lowp vec4 vtx_base; \n\
+" vary " mediump vec2 vtx_uv; \n\
 /* Vertex input*/ \n\
 uniform sampler2D tex; \n\
 void main() \n\
 { \n\
 	mediump vec2 uv=vtx_uv; \n\
 	uv.y=1.0-uv.y; \n\
-	gl_FragColor=vtx_base*texture(tex,uv.st); \n\n\
+	" FRAGCOL "=vtx_base*" TEXLOOKUP "(tex,uv.st); \n\n\
 }";
 
-const char* FullscreenQuadVertexShader =
-	"%s \n\
-	\n\
-	#define TARGET_GL %s \n\
-	\n\
-	#define GLES2 0 \n\
-	#define GLES3 1 \n\
-	#define GL2 2 \n\
-	#define GL3 3 \n\
-	\n\
-	#if TARGET_GL == GLES2 || TARGET_GL == GL2 \n\
-	#define in attribute \n\
-	#define out varying \n\
-	#endif \n\
-	\n\
-	in vec3 position; \n\
-	in vec2 texture_coord; \n\
-	\n\
-	out vec2 vs_texture_coord; \n\
-	\n\
-	void main() \n\
-	{ \n\
-	    vs_texture_coord = texture_coord; \n\
-	    gl_Position = vec4(position, 1); \n\
-	}";
-
-const char* FullscreenQuadFragmentShader =
-	"%s \n\
-	\n\
-	#define TARGET_GL %s \n\
-	\n\
-	#define GLES2 0 \n\
-	#define GLES3 1 \n\
-	#define GL2 2 \n\
-	#define GL3 3 \n\
-	\n\
-	#if TARGET_GL == GLES2 || TARGET_GL == GLES3 \n\
-	precision mediump float; \n\
-	#endif \n\
-	\n\
-	#if TARGET_GL != GLES2 && TARGET_GL != GL2 \n\
-	out vec4 FragColor; \n\
-	#define gl_FragColor FragColor \n\
-	#else \n\
-	#define in varying \n\
-	#define texture texture2D \n\
-	#endif \n\
-	\n\
-	uniform sampler2D texture_data; \n\
-	\n\
-	in vec2 vs_texture_coord; \n\
-	\n\
-	void main() \n\
-	{ \n\
-	    gl_FragColor = texture(texture_data, vs_texture_coord.st); \n\
-	}";
 
 gl_ctx gl;
 
 int screen_width;
 int screen_height;
-GLuint fogTextureId;
-
-GLFramebufferData fullscreenQuad;
 
 #if (HOST_OS != OS_DARWIN) && !defined(TARGET_NACL32)
 #if defined(GLES) && !defined(USE_SDL)
@@ -790,48 +696,6 @@ GLFramebufferData fullscreenQuad;
 
 #endif
 
-void findGLVersion()
-{
-	while (true)
-		if (glGetError() == GL_NO_ERROR)
-			break;
-	glGetIntegerv(GL_MAJOR_VERSION, &gl.gl_major);
-	if (glGetError() == GL_INVALID_ENUM)
-		gl.gl_major = 2;
-	const char *version = (const char *)glGetString(GL_VERSION);
-	if (!strncmp(version, "OpenGL ES", 9))
-	{
-		gl.is_gles = true;
-		if (gl.gl_major >= 3)
-		{
-			gl.gl_version = "GLES3";
-			gl.glsl_version_header = "#version 300 es";
-		}
-		else
-		{
-			gl.gl_version = "GLES2";
-			gl.glsl_version_header = "";
-		}
-		gl.fog_image_format = GL_ALPHA;
-	}
-	else
-	{
-		gl.is_gles = false;
-		if (gl.gl_major >= 3)
-		{
-			gl.gl_version = "GL3";
-			gl.glsl_version_header = "#version 130";
-			gl.fog_image_format = GL_RED;
-		}
-		else
-		{
-			gl.gl_version = "GL2";
-			gl.glsl_version_header = "#version 120";
-			gl.fog_image_format = GL_ALPHA;
-		}
-	}
-}
-
 struct ShaderUniforms_t
 {
 	float PT_ALPHA;
@@ -840,6 +704,7 @@ struct ShaderUniforms_t
 	float fog_den_float;
 	float ps_FOG_COL_RAM[3];
 	float ps_FOG_COL_VERT[3];
+	float fog_coefs[2];
 
 	void Set(PipelineShader* s)
 	{
@@ -860,6 +725,9 @@ struct ShaderUniforms_t
 
 		if (s->sp_FOG_COL_VERT!=-1)
 			glUniform3fv( s->sp_FOG_COL_VERT, 1, ps_FOG_COL_VERT);
+
+		if (s->sp_LOG_FOG_COEFS!=-1)
+			glUniform2fv(s->sp_LOG_FOG_COEFS,1, fog_coefs);
 	}
 
 } ShaderUniforms;
@@ -882,15 +750,7 @@ GLuint gl_CompileShader(const char* shader,GLuint type)
 		*compile_log=0;
 
 		glGetShaderInfoLog(rv, compile_log_len, &compile_log_len, compile_log);
-		if (type == GL_VERTEX_SHADER) {
-			printf("Vertex shader: %s \n%s\n", result ? "compiled!" : "failed to compile", compile_log);
-		}
-		else if (type == GL_FRAGMENT_SHADER) {
-			printf("Fragment shader: %s \n%s\n", result ? "compiled!" : "failed to compile", compile_log);
-		}
-		else {
-			printf("Shader: %s \n%s\n", result ? "compiled!" : "failed to compile", compile_log);
-		}
+		printf("Shader: %s \n%s\n",result?"compiled!":"failed to compile",compile_log);
 
 		free(compile_log);
 	}
@@ -898,10 +758,7 @@ GLuint gl_CompileShader(const char* shader,GLuint type)
 	return rv;
 }
 
-GLuint gl_CompileAndLink(
-	const char* VertexShader,
-	const char* FragmentShader,
-	void (*bindAttribLocationCallback)(GLuint) = NULL)
+GLuint gl_CompileAndLink(const char* VertexShader, const char* FragmentShader)
 {
 	//create shaders
 	GLuint vs=gl_CompileShader(VertexShader ,GL_VERTEX_SHADER);
@@ -911,9 +768,15 @@ GLuint gl_CompileAndLink(
 	glAttachShader(program, vs);
 	glAttachShader(program, ps);
 
-	if (bindAttribLocationCallback != NULL) {
-		bindAttribLocationCallback(program);
-	}
+	//bind vertex attribute to vbo inputs
+	glBindAttribLocation(program, VERTEX_POS_ARRAY,      "in_pos");
+	glBindAttribLocation(program, VERTEX_COL_BASE_ARRAY, "in_base");
+	glBindAttribLocation(program, VERTEX_COL_OFFS_ARRAY, "in_offs");
+	glBindAttribLocation(program, VERTEX_UV_ARRAY,       "in_uv");
+
+#ifndef GLES
+	glBindFragDataLocation(program, 0, "FragColor");
+#endif
 
 	glLinkProgram(program);
 
@@ -937,8 +800,6 @@ GLuint gl_CompileAndLink(
 		die("shader compile fail\n");
 	}
 
-	glDetachShader(program, vs);
-	glDetachShader(program, ps);
 	glDeleteShader(vs);
 	glDeleteShader(ps);
 
@@ -967,76 +828,16 @@ int GetProgramID(u32 cp_AlphaTest, u32 pp_ClipTestMode,
 	return rv;
 }
 
-void generateFullscreenQuadVertices() {
-	const u32 verticesNumber = 4;
-	const u32 indicesNumber = 6;
-
-	const float3 quadPositions[] =
-		{
-			{  1.0f,  1.0f, 0.0f },
-			{ -1.0f,  1.0f, 0.0f },
-			{ -1.0f, -1.0f, 0.0f },
-			{  1.0f, -1.0f, 0.0f },
-		};
-	if (!fullscreenQuad.positionsBuffer) {
-		glGenBuffers(1, &fullscreenQuad.positionsBuffer);
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, fullscreenQuad.positionsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float3) * verticesNumber, quadPositions, GL_STATIC_DRAW);
-
-	const float2 quadTexcoords[] =
-		{
-			{ 1.0f, 1.0f },
-			{ 0.0f, 1.0f },
-			{ 0.0f, 0.0f },
-			{ 1.0f, 0.0f },
-		};
-	if (!fullscreenQuad.texcoordsBuffer) {
-		glGenBuffers(1, &fullscreenQuad.texcoordsBuffer);
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, fullscreenQuad.texcoordsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float2) * verticesNumber, quadTexcoords, GL_STATIC_DRAW);
-
-	const u8 quadIndices[] =
-		{
-			0, 1, 2,
-			0, 2, 3,
-		};
-	if (!fullscreenQuad.indexBuffer) {
-		glGenBuffers(1, &fullscreenQuad.indexBuffer);
-	}
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fullscreenQuad.indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u8) * indicesNumber, quadIndices, GL_STATIC_DRAW);
-
-	// Unbind
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void bindDefaultAttribLocations(GLuint program)
-{
-	//bind vertex attribute to vbo inputs
-	glBindAttribLocation(program, VERTEX_POS_ARRAY,      "in_pos");
-	glBindAttribLocation(program, VERTEX_COL_BASE_ARRAY, "in_base");
-	glBindAttribLocation(program, VERTEX_COL_OFFS_ARRAY, "in_offs");
-	glBindAttribLocation(program, VERTEX_UV_ARRAY,       "in_uv");
-
-#ifndef GLES
-	glBindFragDataLocation(program, 0, "FragColor");
-#endif
-}
-
 bool CompilePipelineShader(	PipelineShader* s)
 {
 	char pshader[8192];
-	char vshader[8192];
 
-	sprintf(pshader,PixelPipelineShader, gl.glsl_version_header, gl.gl_version,
+	sprintf(pshader,PixelPipelineShader,
                 s->cp_AlphaTest,s->pp_ClipTestMode,s->pp_UseAlpha,
                 s->pp_Texture,s->pp_IgnoreTexA,s->pp_ShadInstr,s->pp_Offset,s->pp_FogCtrl);
 
-	sprintf(vshader,VertexShaderSource, gl.glsl_version_header, gl.gl_version);
-	s->program = gl_CompileAndLink(vshader, pshader, bindDefaultAttribLocations);
+	s->program=gl_CompileAndLink(VertexShaderSource,pshader);
+
 
 	//setup texture 0 as the input for the shader
 	GLuint gu=glGetUniformLocation(s->program, "tex");
@@ -1062,15 +863,14 @@ bool CompilePipelineShader(	PipelineShader* s)
 	if (s->pp_FogCtrl==0 || s->pp_FogCtrl==3)
 	{
 		s->sp_FOG_COL_RAM=glGetUniformLocation(s->program, "sp_FOG_COL_RAM");
+		s->sp_LOG_FOG_COEFS=glGetUniformLocation(s->program, "sp_LOG_FOG_COEFS");
 	}
 	else
 	{
 		s->sp_FOG_COL_RAM=-1;
+		s->sp_LOG_FOG_COEFS=-1;
 	}
-	// Setup texture 1 as the fog table
-	gu = glGetUniformLocation(s->program, "fog_table");
-	if (gu != -1)
-		glUniform1i(gu, 1);
+
 
 	ShaderUniforms.Set(s);
 
@@ -1140,36 +940,21 @@ bool gl_create_resources()
 		}
 	}
 
-	findGLVersion();
 
-	const u32 maxShaderSize = 8192;
-	char vshader[maxShaderSize];
-	sprintf(vshader, VertexShaderSource, gl.glsl_version_header, gl.gl_version);
-	char fshader[maxShaderSize];
-	sprintf(fshader, ModifierVolumeShader, gl.glsl_version_header, gl.gl_version);
 
-	gl.modvol_shader.program = gl_CompileAndLink(vshader, fshader, bindDefaultAttribLocations);
-
+	gl.modvol_shader.program=gl_CompileAndLink(VertexShaderSource,ModifierVolumeShader);
 	gl.modvol_shader.scale          = glGetUniformLocation(gl.modvol_shader.program, "scale");
 	gl.modvol_shader.sp_ShaderColor = glGetUniformLocation(gl.modvol_shader.program, "sp_ShaderColor");
 	gl.modvol_shader.depth_scale    = glGetUniformLocation(gl.modvol_shader.program, "depth_scale");
 
-	sprintf(fshader, OSD_Shader,  gl.glsl_version_header, gl.gl_version);
-	gl.OSD_SHADER.program = gl_CompileAndLink(vshader, fshader, bindDefaultAttribLocations);
 
+	gl.OSD_SHADER.program=gl_CompileAndLink(VertexShaderSource,OSD_Shader);
 	printf("OSD: %d\n",gl.OSD_SHADER.program);
 	gl.OSD_SHADER.scale=glGetUniformLocation(gl.OSD_SHADER.program, "scale");
 	gl.OSD_SHADER.depth_scale=glGetUniformLocation(gl.OSD_SHADER.program, "depth_scale");
 	glUniform1i(glGetUniformLocation(gl.OSD_SHADER.program, "tex"),0);		//bind osd texture to slot 0
 
-	if ((settings.rend.VerticalResolution != 100 || settings.rend.HorizontalResolution != 100) && !gl.fullscreenQuadShader) {
-		sprintf(vshader, FullscreenQuadVertexShader, gl.glsl_version_header, gl.gl_version);
-		sprintf(fshader, FullscreenQuadFragmentShader,  gl.glsl_version_header, gl.gl_version);
-		gl.fullscreenQuadShader = gl_CompileAndLink(vshader, fshader);
-		generateFullscreenQuadVertices();
-	}
-
-	//#define PRECOMPILE_SHADERS
+	#define PRECOMPILE_SHADERS
 	#ifdef PRECOMPILE_SHADERS
 	for (u32 i=0;i<sizeof(gl.pogram_table)/sizeof(gl.pogram_table[0]);i++)
 	{
@@ -1199,6 +984,8 @@ GLuint gl_CompileShader(const char* shader,GLuint type);
 bool gl_create_resources();
 
 //setup
+
+
 bool gles_init()
 {
 
@@ -1216,6 +1003,7 @@ bool gles_init()
 	eglSwapInterval(gl.setup.display,1);
 	#endif
 #endif
+    glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
 
 	//clean up all buffers ...
 	for (int i=0;i<10;i++)
@@ -1228,40 +1016,68 @@ bool gles_init()
 	return true;
 }
 
-bool isExtensionSupported(const char * name) {
-	if (!strstr((const char *)glGetString(GL_EXTENSIONS), name)) {
-		return false;
-	}
-	return true;
-}
 
-void UpdateFogTexture(u8 *fog_table, GLenum texture_slot, GLint fog_image_format)
+
+float fog_coefs[]={0,0};
+void tryfit(float* x,float* y)
 {
-	glActiveTexture(texture_slot);
-	if (fogTextureId == 0)
-	{
-		glGenTextures(1, &fogTextureId);
-		glBindTexture(GL_TEXTURE_2D, fogTextureId);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	}
-	else
-		glBindTexture(GL_TEXTURE_2D, fogTextureId);
+	//y=B*ln(x)+A
 
-	u8 temp_tex_buffer[256];
-	for (int i = 0; i < 128; i++)
-	{
-		temp_tex_buffer[i] = fog_table[i * 4];
-		temp_tex_buffer[i + 128] = fog_table[i * 4 + 1];
-	}
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D, 0, fog_image_format, 128, 2, 0, fog_image_format, GL_UNSIGNED_BYTE, temp_tex_buffer);
-	glCheck();
+	double sylnx=0,sy=0,slnx=0,slnx2=0;
 
-	glActiveTexture(GL_TEXTURE0);
+	u32 cnt=0;
+
+	for (int i=0;i<128;i++)
+	{
+		int rep=1;
+
+		//discard values clipped to 0 or 1
+		if (y[i]==1 && y[i+1]==1)
+			continue;
+
+		if (i>0 && y[i]==0 && y[i-1]==0)
+			continue;
+
+		//Add many samples for first and last value (fog-in, fog-out -> important)
+		if (i>0 && y[i]!=1 && y[i-1]==1)
+			rep=10000;
+
+		if (y[i]!=0 && y[i+1]==0)
+			rep=10000;
+
+		for (int j=0;j<rep;j++)
+		{
+			cnt++;
+			sylnx+=y[i]*log((double)x[i]);
+			sy+=y[i];
+			slnx+=log((double)x[i]);
+			slnx2+=log((double)x[i])*log((double)x[i]);
+		}
+	}
+
+	double a,b;
+	b=(cnt*sylnx-sy*slnx)/(cnt*slnx2-slnx*slnx);
+	a=(sy-b*slnx)/(cnt);
+
+
+	//We use log2 and not ln on calculations	//B*log(x)+A
+	//log2(x)=log(x)/log(2)
+	//log(x)=log2(x)*log(2)
+	//B*log(2)*log(x)+A
+	b*=logf(2.0);
+
+	float maxdev=0;
+	for (int i=0;i<128;i++)
+	{
+		float diff=min(max(b*logf(x[i])/logf(2.0)+a,(double)0),(double)1)-y[i];
+		maxdev=max((float)fabs((float)diff),(float)maxdev);
+	}
+	printf("FOG TABLE Curve match: maxdev: %.02f cents\n",maxdev*100);
+	fog_coefs[0]=a;
+	fog_coefs[1]=b;
+	//printf("%f\n",B*log(maxdev)/log(2.0)+A);
 }
+
 
 
 extern u16 kcode[4];
@@ -1326,10 +1142,10 @@ static void DrawButton(float* xy, u32 state)
 
 	vtx.z=1;
 
-	float x=xy[0] * scale_x;
-	float y=xy[1] * scale_y;
-	float w=xy[2] * scale_x;
-	float h=xy[3] * scale_y;
+	float x=xy[0];
+	float y=xy[1];
+	float w=xy[2];
+	float h=xy[3];
 
 	vtx.col[0]=vtx.col[1]=vtx.col[2]=(0x7F-0x40*state/255)*vjoy_pos[13][0];
 
@@ -1630,63 +1446,6 @@ void OSD_DRAW()
 #endif
 }
 
-void fullscreenQuadCreateTemporaryFBO(float & screenToNativeXScale, float & screenToNativeYScale)
-{
-	// Generate and bind a render buffer which will become a depth buffer
-	if (!fullscreenQuad.framebufferRenderbuffer) {
-		glGenRenderbuffers(1, &fullscreenQuad.framebufferRenderbuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, fullscreenQuad.framebufferRenderbuffer);
-#ifdef GLES
-		if (isExtensionSupported("GL_OES_packed_depth_stencil")) {
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, screen_width, screen_height);
-		}
-		else if (isExtensionSupported("GL_OES_depth24")) {
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24_OES, screen_width, screen_height);
-		}
-		else {
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, screen_width, screen_height);
-		}
-#else
-		//OpenGL >= 3.0 is required
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
-#endif
-	}
-
-	// Create a texture for rendering to - may be a color render buffer as well
-	if (!fullscreenQuad.framebufferTexture) {
-		glGenTextures(1, &fullscreenQuad.framebufferTexture);
-		glBindTexture(GL_TEXTURE_2D, fullscreenQuad.framebufferTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	}
-
-	// Create the object that will allow us to render to the aforementioned texture (one for every rtt texture address)
-	if (!fullscreenQuad.framebuffer) {
-		glGenFramebuffers(1, &fullscreenQuad.framebuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, fullscreenQuad.framebuffer);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fullscreenQuad.framebufferTexture, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fullscreenQuad.framebufferRenderbuffer);
-#ifdef GLES
-		if (isExtensionSupported("GL_OES_packed_depth_stencil")) {
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fullscreenQuad.framebufferRenderbuffer);
-		}
-#else
-		//OpenGL >= 3.0 is required
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fullscreenQuad.framebufferRenderbuffer);
-#endif
-		GLuint uStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		verify(uStatus == GL_FRAMEBUFFER_COMPLETE);
-	}
-	else {
-		glBindFramebuffer(GL_FRAMEBUFFER, fullscreenQuad.framebuffer);
-	}
-
-	glViewport(0, 0, screen_width * screenToNativeXScale, screen_height * screenToNativeYScale);
-}
-
 bool ProcessFrame(TA_context* ctx)
 {
 	//disable RTTs for now ..
@@ -1807,18 +1566,8 @@ bool RenderFrame()
 	//float A=-B*max_invW+vnear;
 
 	//these should be adjusted based on the current PVR scaling etc params
-	float dc_width = 640;
-	float dc_height = 480;
-	float screenToNativeXScale = 1.0f;
-	float screenToNativeYScale = 1.0f;
-
-	if (settings.rend.HorizontalResolution >= 1 && settings.rend.HorizontalResolution < 100) {
-		screenToNativeXScale = settings.rend.HorizontalResolution / 100.0f;
-	}
-
-	if (settings.rend.VerticalResolution >= 1 && settings.rend.VerticalResolution < 100) {
-		screenToNativeYScale = settings.rend.VerticalResolution / 100.0f;
-	}
+	float dc_width=640;
+	float dc_height=480;
 
 	if (!is_rtt)
 	{
@@ -1842,8 +1591,7 @@ bool RenderFrame()
 		dc_height=480;
 	}
 
-	scale_x = 1;
-	scale_y = 1;
+	float scale_x=1, scale_y=1;
 
 	float scissoring_scale_x = 1;
 
@@ -1860,17 +1608,17 @@ bool RenderFrame()
 			scissoring_scale_x = 0.5f;
 			scale_x *= 0.5f;
 		}
-
-		if (SCALER_CTL.hscale)
-		{
-			scissoring_scale_x /= 2;
-			scale_x*=2;
-		}
 	}
 
+	if (SCALER_CTL.hscale)
+	{
+		scale_x*=2;
+	}
 
 	dc_width  *= scale_x;
 	dc_height *= scale_y;
+
+	glUseProgram(gl.modvol_shader.program);
 
 	/*
 
@@ -1934,10 +1682,21 @@ bool RenderFrame()
 	s32 fog_den_exp=(s8)fog_density[0];
 	ShaderUniforms.fog_den_float=fog_den_mant*powf(2.0f,fog_den_exp);
 
+
 	if (fog_needs_update)
 	{
-		fog_needs_update = false;
-		UpdateFogTexture((u8 *)FOG_TABLE, GL_TEXTURE1, gl.fog_image_format);
+		fog_needs_update=false;
+		//Get the coefs for the fog curve
+		u8* fog_table=(u8*)FOG_TABLE;
+		float xvals[128];
+		float yvals[128];
+		for (int i=0;i<128;i++)
+		{
+			xvals[i]=powf(2.0f,i>>4)*(1+(i&15)/16.f);
+			yvals[i]=fog_table[i*4+1]/255.0f;
+		}
+
+		tryfit(xvals,yvals);
 	}
 
 	glUseProgram(gl.modvol_shader.program);
@@ -2014,12 +1773,8 @@ bool RenderFrame()
 	else
 	{
 #if HOST_OS != OS_DARWIN
-		if (settings.rend.VerticalResolution == 100 && settings.rend.HorizontalResolution == 100) {
-			glViewport(0, 0, screen_width, screen_height);
-		}
-		else {
-			fullscreenQuadCreateTemporaryFBO(screenToNativeXScale, screenToNativeYScale);
-		}
+        //Fix this in a proper way
+		glBindFramebuffer(GL_FRAMEBUFFER,0);
 #endif
 	}
 
@@ -2030,7 +1785,6 @@ bool RenderFrame()
 	else
 		glClearColor(0,0,0,1.0f);
 
-	glDepthMask(GL_TRUE);
 	glClearDepthf(0.f); glCheck();
 	glStencilMask(0xFF); glCheck();
 	glClear(GL_COLOR_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); glCheck();
@@ -2069,28 +1823,14 @@ bool RenderFrame()
 		printf("SCI: %f, %f, %f, %f\n", offs_x+pvrrc.fb_X_CLIP.min/scale_x,(pvrrc.fb_Y_CLIP.min/scale_y)*dc2s_scale_h,(pvrrc.fb_X_CLIP.max-pvrrc.fb_X_CLIP.min+1)/scale_x*dc2s_scale_h,(pvrrc.fb_Y_CLIP.max-pvrrc.fb_Y_CLIP.min+1)/scale_y*dc2s_scale_h);
 	#endif
 
-	if (settings.rend.VerticalResolution == 100 && settings.rend.HorizontalResolution == 100) {
-		if (settings.rend.WideScreen && pvrrc.fb_X_CLIP.min == 0 &&
-			((pvrrc.fb_X_CLIP.max + 1) / scale_x == 640) && (pvrrc.fb_Y_CLIP.min == 0) &&
-			((pvrrc.fb_Y_CLIP.max + 1) / scale_y == 480)) {
-			glDisable(GL_SCISSOR_TEST);
-		} else {
-			float width = (pvrrc.fb_X_CLIP.max - pvrrc.fb_X_CLIP.min + 1) / scale_x;
-			float height = (pvrrc.fb_Y_CLIP.max - pvrrc.fb_Y_CLIP.min + 1) / scale_y;
-			float min_x = pvrrc.fb_X_CLIP.min / scale_x;
-			float min_y = pvrrc.fb_Y_CLIP.min / scale_y;
-			if (!is_rtt) {
-				// Add x offset for aspect ratio > 4/3
-				min_x = min_x * dc2s_scale_h + ds2s_offs_x;
-				// Invert y coordinates when rendering to screen
-				min_y = screen_height - (min_y + height) * dc2s_scale_h;
-				width *= dc2s_scale_h;
-				height *= dc2s_scale_h;
-			}
-			glScissor(min_x + 0.5f, min_y + 0.5f, width + 0.5f, height + 0.5f);
-			glEnable(GL_SCISSOR_TEST);
-		}
+	glScissor(offs_x+pvrrc.fb_X_CLIP.min/scale_x,(pvrrc.fb_Y_CLIP.min/scale_y)*dc2s_scale_h,(pvrrc.fb_X_CLIP.max-pvrrc.fb_X_CLIP.min+1)/scale_x*dc2s_scale_h,(pvrrc.fb_Y_CLIP.max-pvrrc.fb_Y_CLIP.min+1)/scale_y*dc2s_scale_h);
+	if (settings.rend.WideScreen && pvrrc.fb_X_CLIP.min==0 && ((pvrrc.fb_X_CLIP.max+1)/scale_x==640) && (pvrrc.fb_Y_CLIP.min==0) && ((pvrrc.fb_Y_CLIP.max+1)/scale_y==480 ) )
+	{
+		glDisable(GL_SCISSOR_TEST);
 	}
+	else
+		glEnable(GL_SCISSOR_TEST);
+
 
 	//restore scale_x
 	scale_x /= scissoring_scale_x;
@@ -2104,10 +1844,6 @@ bool RenderFrame()
 	eglCheck();
 
 	KillTex=false;
-
-	if (!is_rtt && (settings.rend.VerticalResolution != 100 || settings.rend.HorizontalResolution != 100)) {
-		DrawFullscreenQuad(screenToNativeXScale, screenToNativeYScale, scale_x, scale_y);
-	}
 
 	return !is_rtt;
 }

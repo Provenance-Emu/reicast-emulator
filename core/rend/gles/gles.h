@@ -3,16 +3,21 @@
 
 
 #ifdef GLES
-#if defined(TARGET_IPHONE) //apple-specific ogles2 headers
-//#include <APPLE/egl.h>
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#else
-#if !defined(TARGET_NACL32)
-#include <EGL/egl.h>
-#endif
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+    #if TARGET_IPHONE || TARGET_IPHONE_SIMULATOR //apple-specific ogles2 headers
+        #include <OpenGLES/ES3/gl.h>
+        #include <OpenGLES/ES3/glext.h>
+    #else
+        #if TARGET_OS_MACCATALYST || TARGET_OS_OSX
+            #include <OpenGL/OpenGL.h>
+            #include <GLUT/GLUT.h>
+            #include <OpenGL/gl3.h>
+        #elif !defined(TARGET_NACL32)
+            #include <EGL/egl.h>
+        #else
+            #include <GLES2/gl2.h>
+            #include <GLES2/gl2ext.h>
+        #endif
+    #endif
 #endif
 
 #ifndef GL_NV_draw_path
@@ -23,15 +28,6 @@
 #pragma comment(lib,"libGLES20.lib")
 #endif
 
-#else
-#if HOST_OS == OS_DARWIN
-    #include <OpenGL/gl3.h>
-#else
-	#include <GL3/gl3w.h>
-#endif
-#endif
-
-
 #define glCheck() do { if (unlikely(settings.validate.OpenGlChecks)) { verify(glGetError()==GL_NO_ERROR); } } while(0)
 #define eglCheck() false
 
@@ -40,35 +36,12 @@
 #define VERTEX_COL_OFFS_ARRAY 2
 #define VERTEX_UV_ARRAY 3
 
-struct float2
-{
-	float x;
-	float y;
-};
-
-struct float3
-{
-	float x;
-	float y;
-	float z;
-};
-
-struct GLFramebufferData {
-	GLuint framebuffer;
-	GLuint framebufferRenderbuffer;
-	GLuint framebufferTexture;
-	GLuint positionsBuffer;
-	GLuint texcoordsBuffer;
-	GLuint indexBuffer;
-};
 
 //vertex types
 extern u32 gcflip;
 
-extern GLFramebufferData fullscreenQuad;
 
 void DrawStrips();
-void DrawFullscreenQuad(float, float, float, float);
 
 struct PipelineShader
 {
@@ -76,7 +49,7 @@ struct PipelineShader
 
 	GLuint scale,depth_scale;
 	GLuint pp_ClipTest,cp_AlphaTestValue;
-	GLuint sp_FOG_COL_RAM,sp_FOG_COL_VERT,sp_FOG_DENSITY;
+	GLuint sp_FOG_COL_RAM,sp_FOG_COL_VERT,sp_FOG_DENSITY,sp_LOG_FOG_COEFS;
 
 	//
 	u32 cp_AlphaTest; s32 pp_ClipTestMode;
@@ -120,13 +93,6 @@ struct gl_ctx
 #endif
 	} vbo;
 
-	GLuint fullscreenQuadShader;
-
-	const char *gl_version;
-	const char *glsl_version_header;
-	int gl_major;
-	bool is_gles;
-	GLuint fog_image_format;
 
 	//GLuint matrix;
 };

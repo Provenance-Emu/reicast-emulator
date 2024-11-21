@@ -620,6 +620,8 @@ struct settings_t
 		bool WideScreen;
 		bool ModifierVolumes;
 		bool Clipping;
+        int VerticalResolution;
+        int HorizontalResolution;
 	} rend;
 
 	struct
@@ -657,6 +659,7 @@ struct settings_t
 		u32 NoBatch;
 		u32 NoSound;        //0 ->sound, 1 -> no sound
 		bool OldSyncronousDma;		// 0 -> sync dma (old behavior), 1 -> async dma (fixes some games, partial implementation)
+        bool DelayInterrupt;
 	} aica;
 
 #if USE_OMX
